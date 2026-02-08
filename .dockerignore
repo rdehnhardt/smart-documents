@@ -1,0 +1,65 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (will be installed in container)
+/vendor
+/node_modules
+
+# Build artifacts
+/public/build
+/public/hot
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Testing
+/tests
+phpunit.xml
+.phpunit.result.cache
+.phpunit.cache
+
+# Development files
+.env
+.env.backup
+.env.local
+.env.*.local
+
+# Logs and cache
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!/storage/logs/.gitignore
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+
+# Bootstrap cache (contains dev dependencies references)
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Database
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+LICENSE
+
+# Claude
+.claude
+CLAUDE.md
+
+# Misc
+.DS_Store
+Thumbs.db

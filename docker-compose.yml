@@ -1,0 +1,136 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-}smart-documents:${TAG:-latest}
+    environment:
+      # ServerSideUp PHP Configuration
+      PHP_OPCACHE_ENABLE: "1"
+      PHP_MEMORY_LIMIT: "128M"
+      PHP_UPLOAD_MAX_FILE_SIZE: "100M"
+      PHP_POST_MAX_SIZE: "100M"
+      SSL_MODE: "off"
+
+      # Laravel Automations (ServerSideUp)
+      AUTORUN_ENABLED: "true"
+      AUTORUN_LARAVEL_MIGRATION: "true"
+      AUTORUN_LARAVEL_MIGRATION_ISOLATION: "false"
+      AUTORUN_LARAVEL_STORAGE_LINK: "true"
+      AUTORUN_LARAVEL_CONFIG_CACHE: "true"
+      AUTORUN_LARAVEL_ROUTE_CACHE: "true"
+      AUTORUN_LARAVEL_VIEW_CACHE: "true"
+      AUTORUN_LARAVEL_EVENT_CACHE: "true"
+
+      # Laravel Configuration
+      APP_NAME: "Smart Documents"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "${SERVICE_FQDN_APP:-http://localhost}"
+      APP_KEY: "${APP_KEY}"
+
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: smartdocs
+      DB_USERNAME: smartdocs
+      DB_PASSWORD: "${DB_PASSWORD:-smartdocs}"
+
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: 120
+
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      SCOUT_DRIVER: database
+
+      FILESYSTEM_DISK: local
+
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+
+      # Mail Configuration (Mailtrap)
+      MAIL_MAILER: mailtrap
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-noreply@example.com}"
+      MAIL_FROM_NAME: "Smart Documents"
+      MAILTRAP_API_KEY: "${MAILTRAP_API_KEY}"
+    volumes:
+      - storage:/var/www/html/storage/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  queue:
+    image: ${REGISTRY:-}smart-documents:${TAG:-latest}
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    environment:
+      # Disable automations for queue worker
+      AUTORUN_ENABLED: "false"
+
+      # Laravel Configuration
+      APP_NAME: "Smart Documents"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "${SERVICE_FQDN_APP:-http://localhost}"
+      APP_KEY: "${APP_KEY}"
+
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: smartdocs
+      DB_USERNAME: smartdocs
+      DB_PASSWORD: "${DB_PASSWORD:-smartdocs}"
+
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+
+      # Mail Configuration (Mailtrap)
+      MAIL_MAILER: mailtrap
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-noreply@example.com}"
+      MAIL_FROM_NAME: "Smart Documents"
+      MAILTRAP_API_KEY: "${MAILTRAP_API_KEY}"
+    volumes:
+      - storage:/var/www/html/storage/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: smartdocs
+      POSTGRES_USER: smartdocs
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-smartdocs}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+volumes:
+  storage:
+  postgres_data:
